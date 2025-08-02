@@ -2,6 +2,8 @@ from PIL import Image
 from customtkinter import *
 from transformers import pipeline
 import torch
+from autocorrect import Speller
+
 
 # gui creation 
 root = CTk()                    
@@ -24,7 +26,6 @@ text = CTkTextbox(master=root,
 
 text.pack(pady = 15)
 
-
 # summarize function
 def summarize():
     new_window = CTkToplevel(root)
@@ -35,11 +36,12 @@ def summarize():
     user_input=text.get("1.0","end-1c")
     
 
-
     # hugging face model
     summary = pipeline("summarization", model="t5-small")
     txt = summary(user_input, max_length=120, min_length=25, do_sample=False)
     final_summary = txt[0]['summary_text']
+
+    
 
     summary_box = CTkTextbox(master=new_window, 
                              border_color="#6FC276", 
@@ -49,7 +51,10 @@ def summarize():
                              scrollbar_button_color = "#87CDF6", 
                              corner_radius=25)
     
-    summary_box.insert("1.0", final_summary)
+    # autocorrect the summary
+    spelling = Speller(lang='en')
+    autocorrected_text = spelling(final_summary)
+    summary_box.insert("1.0", autocorrected_text)
     summary_box.pack(pady = 15)
     
     new_window.grab_set()
@@ -72,6 +77,20 @@ button.pack(pady=15)
 # settings image
 icon = CTkImage(dark_image=Image.open("gear_icon.png"))
 
+# settings function
+def settings_functions():
+
+    # we go to the settings window
+    settings_window=CTkToplevel(root)
+    settings_window.minsize(500,580)
+    slabel = CTkLabel(settings_window, text="System Settings", fg_color="transparent", font = ("Lexend", 27, 'bold'))
+    slabel.pack(pady=15)
+    settings_window.grab_set()
+
+    # lighting options
+    
+    print('hi')
+
 # settings button 
 settings = CTkButton(root, 
                      corner_radius=25, 
@@ -82,7 +101,7 @@ settings = CTkButton(root,
                      border_width=2, 
                      image=icon,
                      text="",
-                     hover_color = "#87CDF6")
+                     hover_color = "#87CDF6", command=settings_functions)
 
 settings.place(relx=0.01, rely=0.96, anchor="sw")
 
